@@ -1,0 +1,56 @@
+body {
+	margin: 0px;
+	background-color: #000000;
+	overflow: hidden;
+}
+#blocker, #instructions {
+	-webkit-user-select: none;  /* Chrome all / Safari all */
+	-moz-user-select: none;     /* Firefox all */
+	-ms-user-select: none;      /* IE 10+ */
+	user-select: none;          /* Likely future */  
+}
+#lines {
+	position: fixed;
+	display:none;
+	z-index: 1;
+}
+#blocker {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0,0.5);
+	color:white;
+	text-align: center;
+	padding: 2em 0;
+	font-family: avenir;
+}
+#instructions {
+	padding:0.5em;
+	margin:0.5em;
+	font-size: 3em;
+	cursor: pointer;
+	border:1px solid white;
+	border-radius: 0.25em;
+	display: none;
+}
+#instructions:active {
+	color:black;
+	background:white;
+}
+#stats {
+	position:fixed;
+	top:0;
+	left:0;
+	background:white;
+	z-index: 99;
+	padding:10px;
+}
+/*		#stats #ww, #stats #wh {
+	color: green;
+}*/
+#tramp {
+	display: none;
+}
+#tramp a {
+	color: white;
+}
