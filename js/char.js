@@ -88,8 +88,6 @@ function init() {
 	camera.ySpeed = 0;
 
 	/* outside lines */
-	
-
 	lines.width =  1024;
 	lines.height = 1024;
 	linesTexture = new THREE.Texture(lines);
@@ -144,146 +142,148 @@ function init() {
 		scene.add(char);
 
 		instructions.textContent = "Tap to play";
-		function start() {
-
-			if (document.getElementById('phone'))
-				document.getElementById('phone').remove();
-
-			if (restart) {
-				currentDialog = 0;
-				dialogs.map((d) => d.start = 0);
-				nextClip = true;
-				bkgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
-					bkgMusic.stop();
-					bkgMusic.isPlaying = false;		
-					bkgMusic.setBuffer( buffer );
-					bkgMusic.setLoop( true );
-					bkgMusic.play();
-				});
-			} else {
-				animate();
-				bkgMusic.loop = true;
-			}
-
-			bkgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
-				bkgMusic.setBuffer( buffer );
-				bkgMusic.setLoop( true );
-				bkgMusic.play();
-			});
-
-			blocker.style.display = 'none';
-			
-			time = performance.now() + 4000; /* beginning delay */
-
-			linesPlayer.loadAnimation("drawings/empty.json", function() {
-				// turn on dialog.sides, off others
-				planes.map((p, i) => [0,1,4,5].indexOf(i) != -1 ? p.visible = true : p.visible = false);
-			});
-
-			/* for mobile to work  */
-			const source = listener.context.createBufferSource();
-			source.connect(listener.context.destination);
-			source.start();
-		}
 		instructions.addEventListener('touchend', start, false );
 		instructions.addEventListener('click', start, false );
-			
 	});
 }
 
-/* 0: delay, 1: play, 2: end */
+function start() {
+	fullscreen();
+	if (document.getElementById('phone'))
+		document.getElementById('phone').remove();
+
+	if (restart) {
+		currentDialog = 0;
+		dialogs.map((d) => d.start = 0);
+		nextClip = true;
+		bkgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
+			bkgMusic.stop();
+			bkgMusic.isPlaying = false;		
+			bkgMusic.setBuffer( buffer );
+			bkgMusic.setLoop( true );
+			bkgMusic.play();
+		});
+	} else {
+		animate();
+		bkgMusic.loop = true;
+	}
+
+	bkgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
+		bkgMusic.setBuffer( buffer );
+		bkgMusic.setLoop( true );
+		bkgMusic.play();
+	});
+
+	blocker.style.display = 'none';
+	
+	time = performance.now() + 4000; /* beginning delay */
+
+	linesPlayer.loadAnimation("drawings/empty.json", function() {
+		// turn on dialog.sides, off others
+		planes.map((p, i) => [0,1,4,5].indexOf(i) != -1 ? p.visible = true : p.visible = false);
+	});
+
+	/* for mobile to work  */
+	const source = listener.context.createBufferSource();
+	source.connect(listener.context.destination);
+	source.start();
+}
+
+function talk(dialog) {
+	nextClip = false;
+	char.xSpeed = 0;
+	char.zSpeed = 0;
+	camera.ySpeed = Cool.random(-0.001, 0.001);
+	linesPlayer.loadAnimation(dialog.anim, function() {
+		// turn on dialog.sides, off others
+		planes.map((p, i) => dialog.sides.indexOf(i) != -1 ? p.visible = true : p.visible = false);
+	});
+	audioLoader.load( dialog.track, function(buffer) {
+		voiceSound.setBuffer(buffer);
+		voiceSound.setRefDistance(20);
+		voiceSound.play();
+	});
+
+	mixer.stopAllAction();
+	const talk = talks[Math.floor(Math.random() * talks.length)];
+	mixer.clipAction(char.geometry.animations[talk], char).play();
+	// https://stackoverflow.com/questions/35323062/detect-sound-is-ended-in-three-positionalaudio
+	voiceSound.onEnded = function() {
+		voiceSound.isPlaying = false;
+		time = performance.now() + dialog.end;
+		nextClip = true;
+		const nextIndex = dialogs.indexOf(dialog) + 1;
+		if (nextIndex < dialogs.length)
+			currentDialog = nextIndex;
+		else
+			end();
+	};
+}
+
+function walk() {
+	mixer.stopAllAction();
+	if (Math.random() > 0.3) {
+		const walk = walks[Math.floor(Math.random() * walks.length)];
+		mixer.clipAction(char.geometry.animations[walk], char).play();
+		if (char.position.distanceTo(camera.position) > 10) {
+			char.xSpeed = char.position.x > camera.position.x ? Cool.random(-0.02, 0) : Cool.random(0, 0.02);
+			char.zSpeed = char.position.z > camera.position.z ? Cool.random(-0.02, 0) : Cool.random(0, 0.02);
+		} else {
+			char.xSpeed = Cool.random(-0.02, 0.02);
+			char.zSpeed = Cool.random(-0.02, 0.03);
+		}
+		
+		camera.ySpeed = 0;
+		const vec = new THREE.Vector3(
+			char.position.x + char.xSpeed, 
+			char.position.y,
+			char.position.z + char.zSpeed
+		);
+		char.lookAt(vec);
+	} else {
+		const idle = idles[Math.floor(Math.random() * idles.length)];
+		mixer.clipAction(char.geometry.animations[idle], char).play();
+	}
+}
+
+function end() {
+	bkgLoader.load("clips/end.mp3", function(buffer) {
+		bkgMusic.stop();
+		bkgMusic.isPlaying = false;
+		bkgMusic.setBuffer( buffer );
+		bkgMusic.setLoop( false );
+		bkgMusic.play();
+	});
+	setTimeout(function() {
+		exitFullscreen();
+		restart = true;
+		blocker.style.display = 'block';
+		instructions.textContent = "Tap to play again";
+		headphones.textContent = "End of part 1";
+		document.getElementById("tramp").style.display = "block";
+		nextClip = false;
+		mixer.stopAllAction();
+		const endAnim = [1,2,3,4][Cool.randomInt(0,3)];
+		mixer.clipAction(char.geometry.animations[endAnim], char).play();
+		char.xSpeed = 0;
+		char.zSpeed = 0;
+		linesPlayer.loadAnimation("drawings/big_dogs.json", function() {
+			// turn on dialog.sides, off others
+			planes.map((p, i) => [0,1,2,3,4,5].indexOf(i) != -1 ? p.visible = true : p.visible = false);
+		});
+	}, 2000);
+}
+
 function animate() {
 	/* audio clips */
 	if (performance.now() > time && nextClip) {
 		let dialog = dialogs[currentDialog];
-		if (dialog.start == 1) {
-			nextClip = false;
-			char.xSpeed = 0;
-			char.zSpeed = 0;
-			camera.ySpeed = Cool.random(-0.001, 0.001);
-			linesPlayer.loadAnimation(dialog.anim, function() {
-				// turn on dialog.sides, off others
-				planes.map((p, i) => dialog.sides.indexOf(i) != -1 ? p.visible = true : p.visible = false);
-			});
-			audioLoader.load( dialog.track, function(buffer) {
-				voiceSound.setBuffer(buffer);
-				voiceSound.setRefDistance(20);
-				voiceSound.play();
-			});
-
-			mixer.stopAllAction();
-			const talk = talks[Math.floor(Math.random() * talks.length)];
-			mixer.clipAction(char.geometry.animations[talk], char).play();
-			// https://stackoverflow.com/questions/35323062/detect-sound-is-ended-in-three-positionalaudio
-			voiceSound.onEnded = function() {
-				voiceSound.isPlaying = false;
-				time = performance.now() + dialog.end;
-				nextClip = true;
-				const nextIndex = dialogs.indexOf(dialog) + 1;
-				if (nextIndex < dialogs.length) {
-					currentDialog = nextIndex;
-				} else {
-					/* its over */
-					bkgLoader.load("clips/end.mp3", function(buffer) {
-						bkgMusic.stop();
-						bkgMusic.isPlaying = false;
-						bkgMusic.setBuffer( buffer );
-						bkgMusic.setLoop( false );
-						bkgMusic.play();
-					});
-					setTimeout(function() { 
-						restart = true;
-						blocker.style.display = 'block';
-						instructions.textContent = "Tap to play again";
-						headphones.textContent = "End of part 1";
-						document.getElementById("tramp").style.display = "block";
-						nextClip = false;
-						mixer.stopAllAction();
-						const endAnim = [1,2,3,4][Cool.randomInt(0,3)];
-						mixer.clipAction(char.geometry.animations[endAnim], char).play();
-						char.xSpeed = 0;
-						char.zSpeed = 0;
-						linesPlayer.loadAnimation("drawings/big_dogs.json", function() {
-							// turn on dialog.sides, off others
-							planes.map((p, i) => [0,1,2,3,4,5].indexOf(i) != -1 ? p.visible = true : p.visible = false);
-						});
-					}, 2000);
-				}
-			};
+		if (dialog.started) { // undefined at start
+			talk(dialog);
 		} else {
-			dialog.start = 1;
+			dialog.started = true;
 			time += dialog.delay;
-			mixer.stopAllAction();
-
-			if (Math.random() > 0.3) {
-				const walk = walks[Math.floor(Math.random() * walks.length)];
-				mixer.clipAction(char.geometry.animations[walk], char).play();
-				if (char.position.distanceTo(camera.position) > 10) {
-					char.xSpeed = char.position.x > camera.position.x ? Cool.random(-0.02, 0) : Cool.random(0, 0.02);
-					char.zSpeed = char.position.z > camera.position.z ? Cool.random(-0.02, 0) : Cool.random(0, 0.02);
-				} else {
-					char.xSpeed = Cool.random(-0.02, 0.02);
-					char.zSpeed = Cool.random(-0.02, 0.03);
-				}
-				
-				camera.ySpeed = 0;
-				const vec = new THREE.Vector3(
-					char.position.x + char.xSpeed, 
-					char.position.y,
-					char.position.z + char.zSpeed
-				);
-				char.lookAt(vec);
-			} else {
-				const idle = idles[Math.floor(Math.random() * idles.length)];
-				mixer.clipAction(char.geometry.animations[idle], char).play();
-				// const vec = new THREE.Vector3(
-				// 	camera.position.x, 
-				// 	0,
-				// 	camera.position.z
-				// );
-				// char.lookAt(vec);
-				// make him look somewhere
-			}
+			walk();
 		}
 	}
 
@@ -311,6 +311,27 @@ function onWindowResize() {
 	renderer.setSize(width, height);
 }
 window.addEventListener( 'resize', onWindowResize, false );
+
+function fullscreen() {
+	if (renderer.domElement.requestFullscreen) {
+		renderer.domElement.requestFullscreen();
+	} else if (renderer.domElement.msRequestFullscreen) {
+		renderer.domElement.msRequestFullscreen();
+	} else if (renderer.domElement.mozRequestFullScreen) {
+		renderer.domElement.mozRequestFullScreen();
+	} else if (renderer.domElement.webkitRequestFullscreen) {
+		renderer.domElement.webkitRequestFullscreen();
+	}
+}
+
+function exitFullscreen() {
+	document.exitFullscreen = document.exitFullscreen || document.mozCancelFullScreen || document.webkitExitFullscreen || document.msExitFullscreen;
+	if (document.exitFullscreen)
+		document.exitFullscreen();
+}
+
+
+
 // https://stackoverflow.com/questions/28402100/wrong-value-for-window-innerwidth-during-onload-event-in-firefox-for-android
 
 /* old crap */
