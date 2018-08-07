@@ -3,7 +3,7 @@ body {
 	background-color: #000000;
 	overflow: hidden;
 }
-#blocker, #instructions {
+#blocker, #start-button {
 	-webkit-user-select: none;  /* Chrome all / Safari all */
 	-moz-user-select: none;     /* Firefox all */
 	-ms-user-select: none;      /* IE 10+ */
@@ -24,7 +24,7 @@ body {
 	padding: 2em 0;
 	font-family: avenir;
 }
-#instructions {
+#start-button {
 	padding:0.5em;
 	margin:0.5em;
 	font-size: 3em;
@@ -33,24 +33,14 @@ body {
 	border-radius: 0.25em;
 	display: none;
 }
-#instructions:active {
+#start-button:active {
 	color:black;
 	background:white;
 }
-#stats {
-	position:fixed;
-	top:0;
-	left:0;
-	background:white;
-	z-index: 99;
-	padding:10px;
-}
-/*		#stats #ww, #stats #wh {
-	color: green;
-}*/
-#tramp {
+
+#tramp-link {
 	display: none;
 }
-#tramp a {
+#tramp-link a {
 	color: white;
 }

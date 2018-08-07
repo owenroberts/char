@@ -1,11 +1,7 @@
 var blocker = document.getElementById( 'blocker' );
+var startButton = document.getElementById( 'start-button' );
 var instructions = document.getElementById( 'instructions' );
-var headphones = document.getElementById( 'headphones' );
-
-// const bkgMusic = document.getElementById("music");
 var bkgMusic, bkgLoader;
-// bkgMusic.pause();
-// bkgMusic.currentTime = 0;
 
 let restart = false;
 
@@ -55,19 +51,17 @@ let char;
 function onMotion(ev) {
 	window.removeEventListener('devicemotion', onMotion, false);
 	if (ev.acceleration.x != null || ev.accelerationIncludingGravity.x != null) {
-		instructions.style.display = "block";
-		headphones.textContent = "Wear headphones.";
+		startButton.style.display = "block";
+		instructions.textContent = "Headphones recommended.";
 		init();
 		document.addEventListener('visibilitychange', () => {
 			location.reload(); // hacky for now
 		});
 	}
 }
-
 window.addEventListener('devicemotion', onMotion, false);
 
 function init() {
-
 	clock = new THREE.Clock();
 	scene = new THREE.Scene();
 
@@ -126,7 +120,7 @@ function init() {
 	/* blender */
 	mixer = new THREE.AnimationMixer( scene );
 	let loader = new THREE.JSONLoader();
-	loader.load("models/char_toon.json", function(geometry, materials) {
+	loader.load("models/char_toon.min.json", function(geometry, materials) {
 		var charMat = materials[0];
 		charMat.morphTargets = true;
 		charMat.color.setHex(0x000000);
@@ -141,9 +135,9 @@ function init() {
 			.play();
 		scene.add(char);
 
-		instructions.textContent = "Tap to play";
-		instructions.addEventListener('touchend', start, false );
-		instructions.addEventListener('click', start, false );
+		startButton.textContent = "Tap to play";
+		startButton.addEventListener('touchend', start, false );
+		startButton.addEventListener('click', start, false );
 	});
 }
 
@@ -258,8 +252,9 @@ function end() {
 		exitFullscreen();
 		restart = true;
 		blocker.style.display = 'block';
-		instructions.textContent = "Tap to play again";
-		headphones.textContent = "End of part 1";
+		instructions.style.display = 'block';
+		startButton.textContent = "Tap to play again";
+		instructions.textContent = "End of part 1";
 		document.getElementById("tramp").style.display = "block";
 		nextClip = false;
 		mixer.stopAllAction();
@@ -330,29 +325,4 @@ function exitFullscreen() {
 		document.exitFullscreen();
 }
 
-
-
 // https://stackoverflow.com/questions/28402100/wrong-value-for-window-innerwidth-during-onload-event-in-firefox-for-android
-
-/* old crap */
-
-	// const helperMaterial = new THREE.MeshBasicMaterial( { color: 0xff00ff, wireframe: true } );
-// helper 
-	// const helper = new THREE.Mesh( planeGeo, helperMaterial );
-	// helper.position.set( side[0] * sz, side[1] * sz, side[2] * sz );
-	// helper.rotation.set( side[3], side[4], side[5] );
-	// scene.add( helper );
-
-	// var sphere = new THREE.Mesh( new THREE.SphereGeometry( 50, 20, 10 ), linesMaterial );
-	// sphere.position.set( 0, 0, 0 );
-	// scene.add( sphere );
-
-	// var cyl = new THREE.Mesh( new THREE.CylinderGeometry( 10, 10, 20, 16, 1, true ), linesMaterial );
-	// cyl.position.set( 0, -3, 0 );
-	// scene.add( cyl );
-
-
-	// var light = new THREE.HemisphereLight( 0xeeeeee, 0x020202, 0.75 );
-	// light.position.set( 0.5, 1, 0.75 );
-	// scene.add( light );
-	// scene.add( group );
