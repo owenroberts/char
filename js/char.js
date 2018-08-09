@@ -255,7 +255,7 @@ function end() {
 		instructions.style.display = 'block';
 		startButton.textContent = "Tap to play again";
 		instructions.textContent = "End of part 1";
-		document.getElementById("tramp").style.display = "block";
+		document.getElementById("tramp-link").style.display = "block";
 		nextClip = false;
 		mixer.stopAllAction();
 		const endAnim = [1,2,3,4][Cool.randomInt(0,3)];
