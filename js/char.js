@@ -1,6 +1,7 @@
 var blocker = document.getElementById( 'blocker' );
 var startButton = document.getElementById( 'start-button' );
 var instructions = document.getElementById( 'instructions' );
+var titleDiv = document.getElementById( 'title' );
 var bkgMusic, bkgLoader;
 
 let restart = false;
@@ -52,6 +53,7 @@ function onMotion(ev) {
 	window.removeEventListener('devicemotion', onMotion, false);
 	if (ev.acceleration.x != null || ev.accelerationIncludingGravity.x != null) {
 		startButton.style.display = "block";
+		// titleDiv.style.display = "block";
 		instructions.textContent = "Headphones recommended.";
 		init();
 		document.addEventListener('visibilitychange', () => {
@@ -207,7 +209,7 @@ function talk(dialog) {
 		time = performance.now() + dialog.end;
 		nextClip = true;
 		const nextIndex = dialogs.indexOf(dialog) + 1;
-		if (nextIndex < dialogs.length)
+		if (nextIndex <  1 /*dialogs.length*/)
 			currentDialog = nextIndex;
 		else
 			end();
@@ -253,8 +255,10 @@ function end() {
 		restart = true;
 		blocker.style.display = 'block';
 		instructions.style.display = 'block';
+		// titleDiv.style.display = 'block';
 		startButton.textContent = "Tap to play again";
 		instructions.textContent = "End of part 1";
+		document.getElementById("title").style.display = "block";
 		document.getElementById("tramp-link").style.display = "block";
 		nextClip = false;
 		mixer.stopAllAction();
