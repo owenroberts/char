@@ -1,7 +1,7 @@
 var blocker = document.getElementById( 'blocker' );
 var startButton = document.getElementById( 'start-button' );
 var instructions = document.getElementById( 'instructions' );
-var bkgMusic, bkgLoader;
+var bgMusic, bgLoader;
 
 let restart = false;
 
@@ -35,6 +35,7 @@ let nextClip = true;
 var lines = document.getElementById('lines');
 let width = window.innerWidth, height = window.innerHeight;
 let linesPlayer = new LinesPlayer(lines);
+linesPlayer.isTexture = true;
 let planes = [];
 
 let phoneLines = new LinesPlayer(document.getElementById('phone'));
@@ -54,9 +55,6 @@ function onMotion(ev) {
 		startButton.style.display = "block";
 		instructions.textContent = "Headphones recommended.";
 		init();
-		document.addEventListener('visibilitychange', () => {
-			location.reload(); // hacky for now
-		});
 	}
 }
 window.addEventListener('devicemotion', onMotion, false);
@@ -114,8 +112,8 @@ function init() {
 	audioLoader = new THREE.AudioLoader();
 	voiceSound = new THREE.PositionalAudio( listener );
 
-	bkgLoader = new THREE.AudioLoader();
-	bkgMusic = new THREE.Audio( listener );
+	bgLoader = new THREE.AudioLoader();
+	bgMusic = new THREE.Audio( listener );
 
 	/* blender */
 	mixer = new THREE.AnimationMixer( scene );
@@ -142,7 +140,7 @@ function init() {
 }
 
 function start() {
-	fullscreen();
+	// fullscreen();
 	if (document.getElementById('phone'))
 		document.getElementById('phone').remove();
 
@@ -150,22 +148,22 @@ function start() {
 		currentDialog = 0;
 		dialogs.map((d) => d.start = 0);
 		nextClip = true;
-		bkgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
-			bkgMusic.stop();
-			bkgMusic.isPlaying = false;		
-			bkgMusic.setBuffer( buffer );
-			bkgMusic.setLoop( true );
-			bkgMusic.play();
+		bgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
+			bgMusic.stop();
+			bgMusic.isPlaying = false;		
+			bgMusic.setBuffer( buffer );
+			bgMusic.setLoop( true );
+			bgMusic.play();
 		});
 	} else {
 		animate();
-		bkgMusic.loop = true;
+		bgMusic.loop = true;
 	}
 
-	bkgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
-		bkgMusic.setBuffer( buffer );
-		bkgMusic.setLoop( true );
-		bkgMusic.play();
+	bgLoader.load("clips/theme_7_80_12.mp3", function(buffer) {
+		bgMusic.setBuffer( buffer );
+		bgMusic.setLoop( true );
+		bgMusic.play();
 	});
 
 	blocker.style.display = 'none';
@@ -241,12 +239,12 @@ function walk() {
 }
 
 function end() {
-	bkgLoader.load("clips/end.mp3", function(buffer) {
-		bkgMusic.stop();
-		bkgMusic.isPlaying = false;
-		bkgMusic.setBuffer( buffer );
-		bkgMusic.setLoop( false );
-		bkgMusic.play();
+	bgLoader.load("clips/end.mp3", function(buffer) {
+		bgMusic.stop();
+		bgMusic.isPlaying = false;
+		bgMusic.setBuffer( buffer );
+		bgMusic.setLoop( false );
+		bgMusic.play();
 	});
 	setTimeout(function() {
 		exitFullscreen();
@@ -275,7 +273,7 @@ function animate() {
 	if (performance.now() > time && nextClip) {
 		let dialog = dialogs[currentDialog];
 		if (dialog.started) { // undefined at start
-			talk(dialog);
+			talk( dialog );
 		} else {
 			dialog.started = true;
 			time += dialog.delay;
@@ -285,6 +283,7 @@ function animate() {
 
     requestAnimationFrame(animate);
     linesTexture.needsUpdate = true;
+    linesPlayer.draw();
     mixer.update( clock.getDelta() );
     char.position.x += char.xSpeed;
     char.position.z += char.zSpeed;
@@ -327,3 +326,14 @@ function exitFullscreen() {
 }
 
 // https://stackoverflow.com/questions/28402100/wrong-value-for-window-innerwidth-during-onload-event-in-firefox-for-android
+
+document.addEventListener('visibilitychange', ev => {
+	location.reload(); // easier for now
+	if (document.hidden && !bgMusic.paused) {
+		bgMusic.pause();
+		voiceSound.pause();
+	} else if (!document.hidden && bgMusic.paused) {
+		bgMusic.play();
+		voiceSound.play();
+	}
+});

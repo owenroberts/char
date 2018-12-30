@@ -1,3 +1,0 @@
-11.12.2018
-- blinking works but need to figure out the nodes setup to keep the weird overlays and shit
-- lines look really skinny compared to other lines...
