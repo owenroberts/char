@@ -53,11 +53,15 @@ function onMotion(ev) {
 	window.removeEventListener('devicemotion', onMotion, false);
 	if (ev.acceleration.x != null || ev.accelerationIncludingGravity.x != null) {
 		startButton.style.display = "block";
-		instructions.textContent = "Headphones recommended.";
+		instructions.textContent = "Headphones recommended.  Rotate phone to view.";
+		document.getElementById('phone').style.display = 'block';
+		document.getElementById('desktop').remove();
 		init();
 	}
 }
 window.addEventListener('devicemotion', onMotion, false);
+if (document.getElementById('desktop'))
+	document.getElementById('desktop').style.opacity = 1; 
 
 function init() {
 	clock = new THREE.Clock();

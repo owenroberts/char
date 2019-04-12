@@ -44,3 +44,16 @@ body {
 #tramp-link a, #title a {
 	color: white;
 }
+#phone {
+	margin: 0 auto;
+	display: none;
+}
+
+#desktop {
+	opacity: 0;
+	transition: opacity 2s ease-in;
+}
+
+#desktop a {
+	color: white;
+}
