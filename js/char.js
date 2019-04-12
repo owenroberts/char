@@ -338,11 +338,11 @@ function exitFullscreen() {
 
 document.addEventListener('visibilitychange', ev => {
 	location.reload(); // easier for now
-	if (document.hidden && !bgMusic.paused) {
-		bgMusic.pause();
-		voiceSound.pause();
-	} else if (!document.hidden && bgMusic.paused) {
-		bgMusic.play();
-		voiceSound.play();
-	}
+	// if (document.hidden && !bgMusic.paused) {
+	// 	bgMusic.pause();
+	// 	voiceSound.pause();
+	// } else if (!document.hidden && bgMusic.paused) {
+	// 	bgMusic.play();
+	// 	voiceSound.play();
+	// }
 });
