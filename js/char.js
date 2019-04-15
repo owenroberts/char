@@ -68,7 +68,7 @@ function init() {
 	scene = new THREE.Scene();
 
 	// change orientation for android
-	if (true || navigator.userAgent.toLowerCase().indexOf("android") > -1) {
+	if (navigator.userAgent.toLowerCase().indexOf("android") > -1) {
 		scene.rotation.set( 0, -Math.PI/2, 0 );
 		scene.position.set( 5, 0, 5 ); // offset cam position
 	}
