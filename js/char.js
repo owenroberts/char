@@ -67,6 +67,12 @@ function init() {
 	clock = new THREE.Clock();
 	scene = new THREE.Scene();
 
+	// change orientation for android
+	if (true || navigator.userAgent.toLowerCase().indexOf("android") > -1) {
+		scene.rotation.set( 0, -Math.PI/2, 0 );
+		scene.position.set( 5, 0, 5 ); // offset cam position
+	}
+
 	renderer = new THREE.WebGLRenderer();
 	renderer.setPixelRatio( window.devicePixelRatio );
 	renderer.setSize(width, height);
@@ -296,7 +302,7 @@ function animate() {
     mixer.update( clock.getDelta() );
     char.position.x += char.xSpeed;
     char.position.z += char.zSpeed;
-    camera.position.y += camera.ySpeed;
+    // camera.position.y += camera.ySpeed;
     controls.update();
    	// renderer.render(scene, camera);
    	effect.render( scene, camera );
