@@ -58,6 +58,6 @@ body {
 	color: white;
 }
 
-#view {
+#view, #continue {
 	text-decoration: underline;
 }

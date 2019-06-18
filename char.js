@@ -52,16 +52,28 @@ let char;
 function onMotion(ev) {
 	window.removeEventListener('devicemotion', onMotion, false);
 	if (ev.acceleration.x != null || ev.accelerationIncludingGravity.x != null) {
-		startButton.style.display = "block";
-		instructions.textContent = "Headphones recommended.  Rotate phone to view.";
-		document.getElementById('phone').style.display = 'block';
-		document.getElementById('desktop').remove();
-		init();
+		launch();
 	}
 }
 window.addEventListener('devicemotion', onMotion, false);
 if (document.getElementById('desktop'))
 	document.getElementById('desktop').style.opacity = 1; 
+
+let touchControls = false;
+if (location.search.split('?')[1].split('=')[0] == 'touch') {
+	touchControls = true;
+	launch();
+}
+
+
+function launch() {
+	startButton.style.display = "block";
+	instructions.innerHTML = "Headphones recommended." 
+	if (!touchControls) instructions.innerHTML += "<br> Rotate phone to view.";
+	document.getElementById('phone').style.display = 'block';
+	document.getElementById('desktop').remove();
+	init();
+}
 
 function init() {
 	clock = new THREE.Clock();
@@ -69,6 +81,7 @@ function init() {
 
 	// change orientation for android
 	if (navigator.userAgent.toLowerCase().indexOf("android") > -1) {
+		console.log('android rotation');
 		scene.rotation.set( 0, -Math.PI/2, 0 );
 		scene.position.set( 5, 0, 5 ); // offset cam position
 	}
@@ -85,7 +98,9 @@ function init() {
 	} );
 
 	camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 1, 1100 );
-	controls = new THREE.DeviceOrientationControls( camera );
+	
+	if (!touchControls) controls = new THREE.DeviceOrientationControls( camera );
+	
 	camera.position.z = 5;
 	camera.ySpeed = 0;
 
@@ -114,7 +129,6 @@ function init() {
 		planeMesh.rotation.set( side[3], side[4], side[5] );
 		scene.add( planeMesh );
 		planes.push(planeMesh);
-		
 	}
 
 	listener = new THREE.AudioListener();
@@ -149,10 +163,12 @@ function init() {
 	});
 }
 
+
 function start() {
 	// fullscreen();
 	if (document.getElementById('phone'))
 		document.getElementById('phone').remove();
+	if (touchControls) setupTouchControls();
 
 	if (restart) {
 		currentDialog = 0;
@@ -220,8 +236,7 @@ function talk(dialog) {
 			currentDialog = nextIndex;
 			nextClip = true;
 		}
-		else
-			setTimeout(end, 4000);
+		else setTimeout(end, 4000);
 	};
 }
 
@@ -288,11 +303,9 @@ function animate() {
 		if (dialog.start == 1) {
 			talk( dialog );
 		} else {
-			if (currentDialog == 0)
-				walk( true );
+			if (currentDialog == 0) walk( true );
 			dialog.start = 1;
 			time += dialog.delay;
-			// walk();
 		}
 	}
 
@@ -303,7 +316,7 @@ function animate() {
     char.position.x += char.xSpeed;
     char.position.z += char.zSpeed;
     // camera.position.y += camera.ySpeed;
-    controls.update();
+    if (!touchControls) controls.update();
    	// renderer.render(scene, camera);
    	effect.render( scene, camera );
 }
